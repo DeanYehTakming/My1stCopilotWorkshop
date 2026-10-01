@@ -189,7 +189,34 @@ input {
   border-top: 1px solid var(--border-color);
   color: var(--muted-color);
   font-weight: 700;
-  text-align: right;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.clear-completed-btn {
+  border: none;
+  border-radius: 10px;
+  background: var(--danger-soft);
+  color: var(--danger-color);
+  padding: 8px 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.15s ease, opacity 0.2s ease;
+}
+
+.clear-completed-btn:hover:not(:disabled) {
+  background: #fecaca;
+}
+
+.clear-completed-btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.clear-completed-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 @media (max-width: 480px) {

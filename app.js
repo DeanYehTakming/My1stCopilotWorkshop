@@ -8,6 +8,7 @@ const addBtn = document.getElementById('addBtn');
 const todoList = document.getElementById('todoList');
 const emptyState = document.getElementById('emptyState');
 const todoCount = document.getElementById('todoCount');
+const clearCompletedBtn = document.getElementById('clearCompletedBtn');
 
 // 讀取 localStorage 中的待辦資料。
 // 如果沒有資料，則回傳空陣列。
@@ -34,10 +35,28 @@ function saveTodos() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(todos));
 }
 
+// 取得已完成項目的數量。
+function getCompletedCount() {
+  return todos.filter((todo) => todo.completed).length;
+}
+
 // 更新底部顯示的未完成數量。
 function updateTodoCount() {
   const remainingCount = todos.filter((todo) => !todo.completed).length;
   todoCount.textContent = `未完成: ${remainingCount} 項`;
+}
+
+// 更新清除已完成按鈕的顯示狀態。
+function updateClearCompletedButton() {
+  const completedCount = getCompletedCount();
+  const hasCompletedTodos = completedCount > 0;
+
+  clearCompletedBtn.hidden = !hasCompletedTodos;
+  clearCompletedBtn.disabled = !hasCompletedTodos;
+  clearCompletedBtn.setAttribute(
+    'aria-label',
+    hasCompletedTodos ? '清除所有已完成項目' : '目前沒有已完成項目可清除'
+  );
 }
 
 // 根據目前清單內容，決定是否顯示空狀態提示。
@@ -97,6 +116,7 @@ function renderTodos() {
   });
 
   updateTodoCount();
+  updateClearCompletedButton();
   updateEmptyState();
 }
 
@@ -143,6 +163,25 @@ function deleteTodo(id) {
   renderTodos();
 }
 
+// 一次刪除所有已完成項目。
+function clearCompletedTodos() {
+  const completedCount = getCompletedCount();
+
+  if (completedCount === 0) {
+    return;
+  }
+
+  const confirmed = window.confirm(`確定要刪除 ${completedCount} 個已完成項目嗎？`);
+
+  if (!confirmed) {
+    return;
+  }
+
+  todos = todos.filter((todo) => !todo.completed);
+  saveTodos();
+  renderTodos();
+}
+
 // 事件綁定：新增按鈕與 Enter 鍵。
 addBtn.addEventListener('click', addTodo);
 
@@ -178,6 +217,8 @@ todoList.addEventListener('click', (event) => {
     deleteTodo(item.dataset.id);
   }
 });
+
+clearCompletedBtn.addEventListener('click', clearCompletedTodos);
 
 // 啟動畫面時先渲染既有資料。
 renderTodos();
