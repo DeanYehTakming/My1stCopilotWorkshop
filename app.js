@@ -2,6 +2,8 @@
 // 程式會將資料存放在 localStorage 中，讓重新整理後仍然保留原本的待辦事項。
 
 const STORAGE_KEY = 'todo-list-data';
+const FILTER_STORAGE_KEY = 'todo-list-filter';
+const VALID_FILTERS = ['all', 'active', 'completed'];
 
 const todoInput = document.getElementById('todoInput');
 const addBtn = document.getElementById('addBtn');
@@ -11,7 +13,17 @@ const todoCount = document.getElementById('todoCount');
 const clearCompletedBtn = document.getElementById('clearCompletedBtn');
 const filterButtons = document.querySelectorAll('.filter-btn');
 
-let currentFilter = 'all';
+function loadCurrentFilter() {
+  const savedFilter = localStorage.getItem(FILTER_STORAGE_KEY);
+
+  if (!savedFilter || !VALID_FILTERS.includes(savedFilter)) {
+    return 'all';
+  }
+
+  return savedFilter;
+}
+
+let currentFilter = loadCurrentFilter();
 
 // 讀取 localStorage 中的待辦資料。
 // 如果沒有資料，則回傳空陣列。
@@ -154,10 +166,12 @@ function renderTodos() {
 
 // 切換篩選條件。
 function setFilter(filterName) {
-  currentFilter = filterName;
+  const normalizedFilter = VALID_FILTERS.includes(filterName) ? filterName : 'all';
+  currentFilter = normalizedFilter;
+  localStorage.setItem(FILTER_STORAGE_KEY, currentFilter);
 
   filterButtons.forEach((button) => {
-    const isActive = button.dataset.filter === filterName;
+    const isActive = button.dataset.filter === currentFilter;
     button.classList.toggle('is-active', isActive);
     button.setAttribute('aria-pressed', String(isActive));
   });
@@ -270,5 +284,5 @@ filterButtons.forEach((button) => {
   });
 });
 
-// 啟動畫面時先渲染既有資料。
-renderTodos();
+// 啟動畫面時先恢復上次的篩選條件，並渲染既有資料。
+setFilter(currentFilter);
