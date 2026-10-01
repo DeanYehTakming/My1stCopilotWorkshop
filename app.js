@@ -9,6 +9,9 @@ const todoList = document.getElementById('todoList');
 const emptyState = document.getElementById('emptyState');
 const todoCount = document.getElementById('todoCount');
 const clearCompletedBtn = document.getElementById('clearCompletedBtn');
+const filterButtons = document.querySelectorAll('.filter-btn');
+
+let currentFilter = 'all';
 
 // 讀取 localStorage 中的待辦資料。
 // 如果沒有資料，則回傳空陣列。
@@ -40,6 +43,36 @@ function getCompletedCount() {
   return todos.filter((todo) => todo.completed).length;
 }
 
+// 取得依照目前篩選條件，要顯示的待辦事項。
+function getVisibleTodos() {
+  if (currentFilter === 'active') {
+    return todos.filter((todo) => !todo.completed);
+  }
+
+  if (currentFilter === 'completed') {
+    return todos.filter((todo) => todo.completed);
+  }
+
+  return todos;
+}
+
+// 依照目前篩選條件決定空狀態訊息。
+function getEmptyMessage() {
+  if (todos.length === 0) {
+    return '還沒有任何待辦事項,新增一個吧!';
+  }
+
+  if (currentFilter === 'active') {
+    return '太棒了,目前沒有未完成的事項!';
+  }
+
+  if (currentFilter === 'completed') {
+    return '目前沒有已完成的事項。這些項目只是被目前篩選條件過濾掉,並未被刪除。';
+  }
+
+  return '還沒有任何待辦事項,新增一個吧!';
+}
+
 // 更新底部顯示的未完成數量。
 function updateTodoCount() {
   const remainingCount = todos.filter((todo) => !todo.completed).length;
@@ -59,13 +92,11 @@ function updateClearCompletedButton() {
   );
 }
 
-// 根據目前清單內容，決定是否顯示空狀態提示。
-function updateEmptyState() {
-  if (todos.length === 0) {
-    emptyState.classList.add('visible');
-  } else {
-    emptyState.classList.remove('visible');
-  }
+// 根據目前篩選結果，決定是否顯示空狀態提示。
+function updateEmptyState(visibleTodos) {
+  const shouldShowEmptyState = visibleTodos.length === 0;
+  emptyState.textContent = getEmptyMessage();
+  emptyState.classList.toggle('visible', shouldShowEmptyState);
 }
 
 // 建立一個待辦項目 DOM 節點。
@@ -108,16 +139,30 @@ function createTodoItem(todo) {
 
 // 重新繪製整份待辦清單。
 function renderTodos() {
+  const visibleTodos = getVisibleTodos();
   todoList.innerHTML = '';
 
-  todos.forEach((todo) => {
+  visibleTodos.forEach((todo) => {
     const item = createTodoItem(todo);
     todoList.appendChild(item);
   });
 
   updateTodoCount();
   updateClearCompletedButton();
-  updateEmptyState();
+  updateEmptyState(visibleTodos);
+}
+
+// 切換篩選條件。
+function setFilter(filterName) {
+  currentFilter = filterName;
+
+  filterButtons.forEach((button) => {
+    const isActive = button.dataset.filter === filterName;
+    button.classList.toggle('is-active', isActive);
+    button.setAttribute('aria-pressed', String(isActive));
+  });
+
+  renderTodos();
 }
 
 // 新增待辦事項。
@@ -219,6 +264,11 @@ todoList.addEventListener('click', (event) => {
 });
 
 clearCompletedBtn.addEventListener('click', clearCompletedTodos);
+filterButtons.forEach((button) => {
+  button.addEventListener('click', () => {
+    setFilter(button.dataset.filter);
+  });
+});
 
 // 啟動畫面時先渲染既有資料。
 renderTodos();
