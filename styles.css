@@ -62,6 +62,36 @@ input {
   margin-bottom: 18px;
 }
 
+.filter-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+
+.filter-btn {
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  background: var(--card-color);
+  color: var(--muted-color);
+  padding: 8px 12px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filter-btn:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.filter-btn.is-active {
+  border-color: var(--primary-color);
+  background: var(--primary-color);
+  color: #fff;
+}
+
 #todoInput {
   flex: 1;
   min-width: 0;
